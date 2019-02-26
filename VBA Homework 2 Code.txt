@@ -1,0 +1,130 @@
+' 1) We need to group all ticker symbols together and display them in a group aggregated
+
+' 2) We need to aggregate the sum of all <vol> for each ticker grouping
+
+Sub StockTicker()
+
+'set up the initial variable
+Dim open_value As Double
+Dim close_value As Double
+Dim Change As Double
+Dim Volume As Double
+Dim Percent_Change As Variant
+
+Volume = 0
+Change = 0
+Percent_Change = O
+open_value = Cells(2, 3).Value
+
+
+'keep a record of these stocks in a summary table
+    Dim Summary_Table_Row As Integer
+    Summary_Table_Row = 2
+
+
+For Each ws In Worksheets
+    
+    Dim WorksheetName As String
+    
+    Lastrow = Cells(Rows.Count, 1).End(xlUp).Row
+
+    Cells(1, 9).Value = "Symbol"
+    Cells(1, 10).Value = "Volume"
+    Cells(1, 11).Value = "Change"
+    Cells(1, 12).Value = "Percent Change"
+    
+    'Loop through all stocks
+    For i = 2 To Lastrow
+
+    'check for stockticker letters for aggregation by setting up a check to see if equal
+    If Cells(i + 1, 1).Value <> Cells(i, 1).Value Then
+
+    'set stock name
+    Symbol = Cells(i, 1).Value
+    
+    'set stock open_value
+    open_value = Cells(i, 3)
+            
+    'Add to the Stock Ticker Letter
+    Volume = Volume + Cells(i, 5).Value
+    
+    'calculate change
+    Change = Change + open_value - close_value
+    
+    'set stock close_value
+    close_value = Cells(i, 6)
+    
+    'calculate percent change
+    Percent_Change = Change / open_value
+        
+    'print change ammount
+    Range("L" & Summary_Table_Row).Value = Percent_Chnage
+        
+    'print change ammount
+    Range("K" & Summary_Table_Row).Value = Change
+        
+    'Print Ticker Symbol in the Summary Table
+    Range("I" & Summary_Table_Row).Value = Symbol
+    
+    ' Print the Stock ticker vol total
+    Range("J" & Summary_Table_Row).Value = Volume
+
+    ' Add one to the summary table row
+    Summary_Table_Row = Summary_Table_Row + 1
+    
+    'Reset the Volume Total
+    Volume = 0
+    
+    'reset change
+    Change = 0
+    
+    'reset Percent_chnage
+    Percent_Change = O
+    
+        
+    Else
+
+      ' Add to the Vol Total
+      Volume = Volume + Cells(i, 5).Value
+      
+    
+End If
+    
+Next i
+
+Next ws
+    
+End Sub
+
+Sub CombinedData()
+
+' Add a sheet named "Combined Data"
+    Sheets.Add.Name = "Combined_Data"
+    'move created sheet to be first sheet
+    Sheets("Combined_Data").Move Before:=Sheets(1)
+    ' Specify the location of the combined sheet
+    Set combined_sheet = Worksheets("Combined_Data")
+
+    ' Loop through all sheets
+    For Each ws In Worksheets
+
+        ' Find the last row of the combined sheet after each paste
+        ' Add 1 to get first empty row
+        Lastrow = combined_sheet.Cells(Rows.Count, "A").End(xlUp).Row + 1
+
+        ' Find the last row of each worksheet
+        ' Subtract one to return the number of rows without header
+        lastRowState = ws.Cells(Rows.Count, "A").End(xlUp).Row - 1
+
+        ' Copy the contents of each state sheet into the combined sheet
+        combined_sheet.Range("A" & Lastrow & ":G" & ((lastRowState - 1) + Lastrow)).Value = ws.Range("A2:G" & (lastRowState + 1)).Value
+
+    Next ws
+
+    ' Copy the headers from sheet 1
+    combined_sheet.Range("A1:G1").Value = Sheets(2).Range("A1:G1").Value
+    
+    ' Autofit to display data
+    combined_sheet.Columns("A:G").AutoFit
+
+End Sub
